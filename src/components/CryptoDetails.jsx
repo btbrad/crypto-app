@@ -14,7 +14,11 @@ import {
   NumberOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons'
-import { useGetCryptoDetailsQuery } from '../services/cryptoApi'
+import {
+  useGetCryptoDetailsQuery,
+  useGetCryptoHistoryQuery,
+} from '../services/cryptoApi'
+import LineChart from './LineChart'
 
 const { Title, Text } = Typography
 const { Option } = Select
@@ -23,7 +27,13 @@ const CryptoDetails = () => {
   const { coinId } = useParams()
   const [timePeriod, setTimePeriod] = useState('7d')
   const { data, isFetching } = useGetCryptoDetailsQuery(coinId)
+  const { data: coinHistory } = useGetCryptoHistoryQuery({
+    coinId,
+    timePeriod,
+  })
   const cryptoDetails = data?.data?.coin
+
+  if (isFetching) return 'Loading...'
 
   const time = ['3h', '24h', '7d', '30d', '1y', '3m', '3y', '5y']
 
@@ -114,6 +124,11 @@ const CryptoDetails = () => {
           <Option key={date}>{date}</Option>
         ))}
       </Select>
+      {/* <LineChart
+        coinHistory={coinHistory}
+        currentPrice={millify(cryptoDetails?.price || 0)}
+        coinName={cryptoDetails?.name}
+      /> */}
       <Col className="stats-container">
         <Col className="coin-value-statistics">
           <Col className="coin-value-statistics-heading">
@@ -122,8 +137,8 @@ const CryptoDetails = () => {
             </Title>
             <p>An overview showing the stats of {cryptoDetails.name}</p>
           </Col>
-          {stats.map(({ icon, title, value }) => (
-            <Col className="coin-stats">
+          {stats.map(({ icon, title, value }, index) => (
+            <Col className="coin-stats" key={index}>
               <Col className="coin-stats-name">
                 <Text>{icon}</Text>
                 <Text>{title}</Text>
@@ -139,8 +154,8 @@ const CryptoDetails = () => {
             </Title>
             <p>An overview showing the stats of all cryptocurrencies</p>
           </Col>
-          {genericStats.map(({ icon, title, value }) => (
-            <Col className="coin-stats">
+          {genericStats.map(({ icon, title, value }, index) => (
+            <Col className="coin-stats" key={index}>
               <Col className="coin-stats-name">
                 <Text>{icon}</Text>
                 <Text>{title}</Text>
@@ -154,7 +169,7 @@ const CryptoDetails = () => {
         <Row className="coin-desc">
           <Title level={3} className="coin-details-heading">
             What is {cryptoDetails.name}?
-            {HTMLReactParser(cryptoDetails.description)}
+            {/* {HTMLReactParser(cryptoDetails.description)} */}
           </Title>
         </Row>
         <Col className="coin-links">
